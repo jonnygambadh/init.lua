@@ -1,12 +1,14 @@
 vim.opt.completeopt = { 'menu', 'menuone', 'noselect' }
+local configs = require('lspconfig/configs')
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.completion.completionItem.snippetSupport = true
 
-require("lsp-format").setup()
 require "fidget".setup {}
 
-local prettier = {
-  formatCommand = [[prettier --stdin-filepath ${INPUT} ${--tab-width:tab_width}]],
-  formatStdin = true,
-}
+-- local prettier = {
+--   formatCommand = [[prettier --stdin-filepath ${INPUT} ${--tab-width:tab_width}]],
+--   formatStdin = true,
+-- }
 
 require("mason").setup({
   ui = {
@@ -70,19 +72,32 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
 lspconfig.eslint.setup {}
 lspconfig.tailwindcss.setup {}
 lspconfig.tsserver.setup({
-  on_attach = require("lsp-format").on_attach,
-  init_options = { documentFormatting = true },
-  settings = {
-    languages = {
-      typescript = { prettier },
-      typescriptreact = { prettier },
-      yaml = { prettier },
-    },
-  },
+  -- init_options = { documentFormatting = true },
+  -- settings = {
+  --   languages = {
+  --     typescript = { prettier },
+  --     typescriptreact = { prettier },
+  --     yaml = { prettier },
+  --   },
+  -- },
 })
 
+-- lspconfig.emmet_ls.setup({
+--   -- on_attach = on_attach,
+--   capabilities = capabilities,
+--   filetypes = { 'html', 'typescriptreact', 'javascriptreact', 'css', 'sass', 'scss', 'less' },
+--   init_options = {
+--     html = {
+--       options = {
+--         -- For possible options, see: https://github.com/emmetio/emmet/blob/master/src/config.ts#L79-L267
+--         ["bem.enabled"] = true,
+--       },
+--     },
+--   }
+-- })
+
+local lspkind = require('lspkind')
 lspconfig.sumneko_lua.setup({
-  on_attach = require("lsp-format").on_attach,
   settings = {
     Lua = {
       diagnostics = {
@@ -110,17 +125,11 @@ cmp.setup({
   },
   formatting = {
     fields = { 'menu', 'abbr', 'kind' },
-    format = function(entry, item)
-      local menu_icon = {
-        nvim_lsp = 'λ',
-        luasnip = '⋗',
-        buffer = 'Ω',
-        path = '',
-      }
-
-      item.menu = menu_icon[entry.source.name]
-      return item
-    end,
+    format = lspkind.cmp_format({
+      mode = 'symbol', -- show only symbol annotations
+      maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
+      ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
+    })
   },
   mapping = {
     ['<Up>'] = cmp.mapping.select_prev_item(select_opts),
@@ -179,25 +188,75 @@ cmp.event:on(
   cmp_autopairs.on_confirm_done()
 )
 
-local prettier = require("prettier")
+-- local prettier = require("prettier")
 
-prettier.setup({
-  bin = 'prettier', -- or `'prettierd'` (v0.22+)
-  filetypes = {
-    "css",
-    "graphql",
-    "html",
-    "javascript",
-    "javascriptreact",
-    "json",
-    "less",
-    "markdown",
-    "scss",
-    "typescript",
-    "typescriptreact",
-    "yaml",
-  },
-  cli_options = {
-    semi = true,
+-- prettier.setup({
+--   bin = 'prettier', -- or `'prettierd'` (v0.22+)
+--   filetypes = {
+--     "css",
+--     "graphql",
+--     "html",
+--     "javascript",
+--     "javascriptreact",
+--     "json",
+--     "less",
+--     "markdown",
+--     "scss",
+--     "typescript",
+--     "typescriptreact",
+--     "yaml",
+--   },
+--   cli_options = {
+--     semi = true,
+--   }
+-- })
+
+local lspkind_priority = require('cmp-lspkind-priority')
+lspkind_priority.setup {
+  -- Default priority by nvim-cmp
+  priority = {
+    'Method',
+    'Function',
+    'Constructor',
+    'Field',
+    'Variable',
+    'Class',
+    'Interface',
+    'Snippet',
+    'Module',
+    'Property',
+    'Unit',
+    'Value',
+    'Enum',
+    'Keyword',
+    'Color',
+    'File',
+    'Reference',
+    'Folder',
+    'EnumMember',
+    'Constant',
+    'Struct',
+    'Event',
+    'Operator',
+    'TypeParameter',
+    'Text',
   }
-})
+}
+
+local compare = require('cmp.config.compare')
+require('cmp').setup {
+  sorting = {
+    comparators = {
+      lspkind_priority.compare, -- Replaces `compare.kind` + first comparator
+      compare.offset,
+      compare.exact,
+      -- compare.scopes,
+      compare.score,
+      compare.recently_used,
+      compare.locality,
+      compare.sort_text,
+      compare.length,
+      compare.order,
+    },
+  },
+}

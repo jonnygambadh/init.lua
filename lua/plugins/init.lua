@@ -14,10 +14,6 @@ if not status_ok then
   return
 end
 
-local function maximize_status()
-  return vim.t.maximized and '   ' or ''
-end
-
 local packer_bootstrap = ensure_packer()
 
 local packer = require('packer').startup({ function(use)
@@ -42,7 +38,7 @@ local packer = require('packer').startup({ function(use)
   -- Treesitter
   use({ "David-Kunz/markid" })
   use({ "andymass/vim-matchup" })
-  use({ "nvim-treesitter/nvim-treesitter-textobjects" })
+  use "kiyoon/treesitter-indent-object.nvim"
   use({
     'Wansmer/sibling-swap.nvim',
     requires = { 'nvim-treesitter' },
@@ -74,12 +70,8 @@ local packer = require('packer').startup({ function(use)
       require("luasnip").filetype_extend("typescript", { "ts" })
     end
   })
-
-  -- LSP
   use({ "neovim/nvim-lspconfig" })
-  use({ "MunifTanjim/prettier.nvim" })
   use({ "glepnir/lspsaga.nvim", branch = "main" })
-  use({ "lukas-reineke/lsp-format.nvim" })
   use({
     "williamboman/mason-lspconfig.nvim",
     requires = {
@@ -108,6 +100,31 @@ local packer = require('packer').startup({ function(use)
       'haydenmeade/neotest-jest',
     }
   }
+
+  use({
+    "utilyre/barbecue.nvim",
+    branch = "dev", -- omit this if you only want stable updates
+    requires = {
+      "neovim/nvim-lspconfig",
+      "smiteshp/nvim-navic",
+      "kyazdani42/nvim-web-devicons", -- optional dependency
+    },
+    after = "nvim-web-devicons", -- keep this if you're using NvChad
+    config = function()
+      require("barbecue").setup()
+    end,
+  })
+
+  use({
+    "folke/twilight.nvim",
+    config = function()
+      require("twilight").setup {
+        -- your configuration comes here
+        -- or leave it empty to use the default settings
+        -- refer to the configuration section below
+      }
+    end
+  })
 
   -- Jumps
   use({ "ThePrimeagen/harpoon" })
@@ -190,14 +207,7 @@ local packer = require('packer').startup({ function(use)
     "nvim-lualine/lualine.nvim",
     requires = { "kyazdani42/nvim-web-devicons", opt = true },
     config = function()
-      require('lualine').setup {
-        options = {
-          theme = 'tokyonight'
-        },
-        sections = {
-          lualine_c = { maximize_status }
-        }
-      }
+      require('lualine').setup {}
     end
   })
   use({
@@ -220,7 +230,6 @@ local packer = require('packer').startup({ function(use)
       require('treesj').setup()
     end,
   })
-  use({ "anuvyklack/hydra.nvim" })
   use({
     "nvim-neo-tree/neo-tree.nvim",
     branch = "v2.x",
@@ -240,27 +249,87 @@ local packer = require('packer').startup({ function(use)
   })
 
   use {
-    "folke/which-key.nvim",
+  "nvim-telescope/telescope-frecency.nvim",
+  config = function()
+    require"telescope".load_extension("frecency")
+  end,
+  requires = {"kkharji/sqlite.lua"}
+}
+  use({ "ofirgall/cmp-lspkind-priority" })
+  use({ "onsails/lspkind.nvim", config=function ()
+    require("lspkind").setup()
+  end })
+  use({
+    "sindrets/diffview.nvim",
+    requires = "nvim-lua/plenary.nvim",
     config = function()
-      require("which-key").setup {
-        -- your configuration comes here
-        -- or leave it empty to use the default settings
-        -- refer to the configuration section below
-      }
+      require("diffview").setup({
+        view = {
+          default = {
+            layout = "diff2_vertical",
+          },
+          merge_tool = {
+            layout = "diff3_vertical",
+            disable_diagnostics = true, -- Temporarily disable diagnostics for conflict buffers while in the view.
+          },
+          file_history = {
+            -- Config for changed files in file history views.
+            layout = "diff2_vertical",
+          },
+        }
+      })
     end
-  }
-  -- Packer
-  use { 'sindrets/diffview.nvim', requires = 'nvim-lua/plenary.nvim' }
+  })
 
   -- UI
   use({ "sam4llis/nvim-tundra" })
-  use({ "folke/tokyonight.nvim" })
+  use({ "EdenEast/nightfox.nvim" })
+  use({ "folke/tokyonight.nvim",
+    config = function()
+      require("tokyonight").setup({
+        on_highlights = function(hl, c)
+          local prompt = "#2d3149"
+          hl.TelescopeNormal = {
+            bg = c.bg_dark,
+            fg = c.fg_dark,
+          }
+          hl.TelescopeBorder = {
+            bg = c.bg_dark,
+            fg = c.bg_dark,
+          }
+          hl.TelescopePromptNormal = {
+            bg = prompt,
+          }
+          hl.TelescopePromptBorder = {
+            bg = prompt,
+            fg = prompt,
+          }
+          hl.TelescopePromptTitle = {
+            bg = prompt,
+            fg = prompt,
+          }
+          hl.TelescopePreviewTitle = {
+            bg = c.bg_dark,
+            fg = c.bg_dark,
+          }
+          hl.TelescopeResultsTitle = {
+            bg = c.bg_dark,
+            fg = c.bg_dark,
+          }
+        end,
+      })
+    end })
   use({ "nyoom-engineering/oxocarbon.nvim" })
   use({ "pantharshit00/vim-prisma" })
+  use { 'stevearc/dressing.nvim' }
   use({
     "norcalli/nvim-colorizer.lua",
     config = function()
-      require("colorizer").setup()
+      require("colorizer").setup({
+        user_default_options = {
+          tailwind = true
+        }
+      })
     end
   })
   use({
@@ -270,12 +339,6 @@ local packer = require('packer').startup({ function(use)
         show_current_context = true,
         show_current_context_start = true,
       }
-    end
-  })
-
-  use({ "kiyoon/treesitter-indent-object.nvim",
-    config = function()
-      require("treesitter_indent_object").setup()
     end
   })
 
@@ -290,6 +353,7 @@ local packer = require('packer').startup({ function(use)
       })
     end
   })
+  use({ "p00f/nvim-ts-rainbow" })
 
   -- Quickfix
   use { 'kevinhwang91/nvim-bqf', ft = 'qf' }

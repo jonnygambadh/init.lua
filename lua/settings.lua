@@ -40,9 +40,11 @@ vim.o.updatetime = 300
 
 vim.o.completeopt = 'menuone,preview,noinsert'
 vim.o.hidden = true
+vim.o.ls = 0
+vim.o.ch = 0
 
 vim.cmd [[
-  colorscheme tokyonight-night
+  colorscheme nightfox
   set encoding=utf-8
   set fileencoding=utf-8
   set noshowmode

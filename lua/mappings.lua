@@ -20,11 +20,10 @@ keymap("n", "<leader>ho", ":OpenInGHRepo <cr>", opts)
 keymap("n", "<leader>hf", ":OpenInGHFile <cr>", opts)
 
 -- Telescope
-keymap("n", "<C-p>", ":Telescope find_files<cr>", opts)
 keymap("n", "<leader>tm", ":Telescope marks<cr>", opts)
 keymap("n", "<leader>tg", ":Telescope grep_string<cr>", opts)
 keymap("n", "<leader>tl", ":Telescope live_grep<cr>", opts)
-keymap("n", "<leader>tf", ":Telescope current_buffer_fuzzy_find<cr>", opts)
+keymap("n", "<C-f>", ":Telescope find_files<cr>", opts)
 keymap("n", "<leader>tc", ":Telescope git_commits<cr>", opts)
 keymap("n", "<leader>ti", ":Telescope git_bcommits<cr>", opts)
 keymap("n", "<leader>ts", ":Telescope git_status<cr>", opts)
@@ -33,9 +32,10 @@ keymap("n", "<leader>tb", ":Telescope buffers theme=dropdown<cr>", opts)
 keymap("n", "<leader>tj", ":Telescope jumplist theme=dropdown<cr>", opts)
 
 -- Telescope plugins
-keymap("n", "<leader>th", ":Telescope harpoon marks theme=dropdown<cr>", opts)
+keymap("n", "<C-p>", ":Telescope harpoon marks<cr>", opts)
 keymap("n", "<leader>ta", ":Telescope adjacent theme=dropdown<cr>", opts)
 keymap("n", "<leader>tt", ":Telescope tailiscope<cr>", opts)
+keymap("n", "<leader>tf", "<Cmd>lua require('telescope').extensions.frecency.frecency()<CR>", opts)
 
 -- LSP
 vim.api.nvim_create_autocmd("LspAttach", {
@@ -101,6 +101,7 @@ keymap("n", "m_", ":MarksQFListAll<cr>", opts)
 
 -- Zen Mode
 keymap("n", "<leader>zz", ":ZenMode<cr>", opts)
+vim.keymap.set('n', '<Leader>zm', "<Cmd>lua require('maximize').toggle()<CR>")
 keymap("n", "<leader>of", ":Neotree toggle filesystem reveal right <cr>", opts)
 keymap("n", "<leader>ob", ":Neotree toggle buffers reveal float <cr>", opts)
 keymap("n", "<leader>oh", ":Neotree toggle git_status reveal float <cr>", opts)
@@ -111,10 +112,11 @@ keymap("n", "[b", ":bprevious<cr>", opts)
 keymap("n", "]b", ":bnext<cr>", opts)
 
 -- select context-aware indent
-vim.keymap.set("x", "ai", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_outer()<CR>")
+vim.keymap.set({"x", "o"}, "ai", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_outer()<CR>")
 -- ensure selecting entire line (or just use Vai)
-vim.keymap.set("x", "aI", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_outer(true)<CR>")
+vim.keymap.set({"x", "o"}, "aI", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_outer(true)<CR>")
 -- select inner block (only if block, only else block, etc.)
-vim.keymap.set("x", "ii", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_inner()<CR>")
+vim.keymap.set({"x", "o"}, "ii", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_inner()<CR>")
 -- select entire inner range (including if, else, etc.)
-vim.keymap.set("x", "iI", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_inner(true)<CR>")
+vim.keymap.set({"x", "o"}, "iI", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_inner(true)<CR>")
+
