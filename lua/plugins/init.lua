@@ -28,12 +28,6 @@ local packer = require('packer').startup({ function(use)
   use({ "farmergreg/vim-lastplace" })
   use({ "christoomey/vim-system-copy" })
   use({ "tpope/vim-repeat" })
-  use({
-    "b0o/incline.nvim",
-    config = function()
-      require("incline").setup()
-    end
-  })
 
   -- Treesitter
   use({ "David-Kunz/markid" })
@@ -71,7 +65,16 @@ local packer = require('packer').startup({ function(use)
     end
   })
   use({ "neovim/nvim-lspconfig" })
-  use({ "glepnir/lspsaga.nvim", branch = "main" })
+  use({
+    "marilari88/twoslash-queries.nvim",
+    config = function()
+      require("twoslash-queries").setup({
+        multi_line = true, -- to print types in multi line mode
+        is_enabled = true, -- to keep disabled at startup and enable it on request with the EnableTwoslashQueries
+        highlight = "Type",
+      })
+    end
+  })
   use({
     "williamboman/mason-lspconfig.nvim",
     requires = {
@@ -102,20 +105,6 @@ local packer = require('packer').startup({ function(use)
   }
 
   use({
-    "utilyre/barbecue.nvim",
-    branch = "dev", -- omit this if you only want stable updates
-    requires = {
-      "neovim/nvim-lspconfig",
-      "smiteshp/nvim-navic",
-      "kyazdani42/nvim-web-devicons", -- optional dependency
-    },
-    after = "nvim-web-devicons", -- keep this if you're using NvChad
-    config = function()
-      require("barbecue").setup()
-    end,
-  })
-
-  use({
     "folke/twilight.nvim",
     config = function()
       require("twilight").setup {
@@ -125,6 +114,12 @@ local packer = require('packer').startup({ function(use)
       }
     end
   })
+  use {
+    'rmagatti/goto-preview',
+    config = function()
+      require('goto-preview').setup {}
+    end
+  }
 
   -- Jumps
   use({ "ThePrimeagen/harpoon" })
@@ -163,13 +158,16 @@ local packer = require('packer').startup({ function(use)
       require("bufresize").setup()
     end
   }
-
-  use({
-    "terrortylor/nvim-comment",
+  use {
+    'numToStr/Comment.nvim',
     config = function()
-      require('nvim_comment').setup()
+      require('Comment').setup({
+        pre_hook = require('ts_context_commentstring.integrations.comment_nvim').create_pre_hook()
+      })
     end
-  })
+  }
+  use 'JoosepAlviste/nvim-ts-context-commentstring'
+
   use({
     "kylechui/nvim-surround",
     config = function()
@@ -248,17 +246,6 @@ local packer = require('packer').startup({ function(use)
     end
   })
 
-  use {
-  "nvim-telescope/telescope-frecency.nvim",
-  config = function()
-    require"telescope".load_extension("frecency")
-  end,
-  requires = {"kkharji/sqlite.lua"}
-}
-  use({ "ofirgall/cmp-lspkind-priority" })
-  use({ "onsails/lspkind.nvim", config=function ()
-    require("lspkind").setup()
-  end })
   use({
     "sindrets/diffview.nvim",
     requires = "nvim-lua/plenary.nvim",
@@ -280,46 +267,28 @@ local packer = require('packer').startup({ function(use)
       })
     end
   })
+  use({
+    'weilbith/nvim-code-action-menu',
+    cmd = 'CodeActionMenu',
+  })
+
+  use {
+  'boltlessengineer/bufterm.nvim',
+  config = function()
+    require('bufterm').setup()
+  end,
+  }
+
+  use({
+    'ckolkey/ts-node-action',
+    requires = { 'nvim-treesitter' },
+    config = function()
+      require("ts-node-action").setup({})
+    end
+  })
 
   -- UI
-  use({ "sam4llis/nvim-tundra" })
   use({ "EdenEast/nightfox.nvim" })
-  use({ "folke/tokyonight.nvim",
-    config = function()
-      require("tokyonight").setup({
-        on_highlights = function(hl, c)
-          local prompt = "#2d3149"
-          hl.TelescopeNormal = {
-            bg = c.bg_dark,
-            fg = c.fg_dark,
-          }
-          hl.TelescopeBorder = {
-            bg = c.bg_dark,
-            fg = c.bg_dark,
-          }
-          hl.TelescopePromptNormal = {
-            bg = prompt,
-          }
-          hl.TelescopePromptBorder = {
-            bg = prompt,
-            fg = prompt,
-          }
-          hl.TelescopePromptTitle = {
-            bg = prompt,
-            fg = prompt,
-          }
-          hl.TelescopePreviewTitle = {
-            bg = c.bg_dark,
-            fg = c.bg_dark,
-          }
-          hl.TelescopeResultsTitle = {
-            bg = c.bg_dark,
-            fg = c.bg_dark,
-          }
-        end,
-      })
-    end })
-  use({ "nyoom-engineering/oxocarbon.nvim" })
   use({ "pantharshit00/vim-prisma" })
   use { 'stevearc/dressing.nvim' }
   use({
@@ -354,6 +323,25 @@ local packer = require('packer').startup({ function(use)
     end
   })
   use({ "p00f/nvim-ts-rainbow" })
+  use({
+    "b0o/incline.nvim",
+    config = function()
+      require('incline').setup()
+    end
+  })
+
+  use { "LinArcX/telescope-command-palette.nvim" }
+  use("LudoPinelli/comment-box.nvim")
+  use { 'echasnovski/mini.ai', branch = 'stable', config = function()
+    require('mini.ai').setup()
+  end }
+  use {
+    "chrisgrieser/nvim-various-textobjs",
+    config = function()
+      require("various-textobjs").setup({ useDefaultKeymaps = true })
+    end,
+  }
+  use { 'nvim-treesitter/nvim-treesitter-textobjects' }
 
   -- Quickfix
   use { 'kevinhwang91/nvim-bqf', ft = 'qf' }
@@ -374,7 +362,6 @@ end,
     }
   } })
 
-require("plugins.configs.tundra")
 require("plugins.configs.treesitter")
 require("plugins.configs.telescope")
 require("plugins.configs.lspconfig")

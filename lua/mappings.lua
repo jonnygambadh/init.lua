@@ -1,5 +1,4 @@
 local keymap = vim.api.nvim_set_keymap
-local api = vim.api
 local opts = { noremap = true, silent = true }
 
 keymap('n', '<leader>ev', '<cmd>tabe $MYVIMRC<cr>', opts)
@@ -23,21 +22,27 @@ keymap("n", "<leader>hf", ":OpenInGHFile <cr>", opts)
 keymap("n", "<leader>tm", ":Telescope marks<cr>", opts)
 keymap("n", "<leader>tg", ":Telescope grep_string<cr>", opts)
 keymap("n", "<leader>tl", ":Telescope live_grep<cr>", opts)
-keymap("n", "<C-f>", ":Telescope find_files<cr>", opts)
+keymap("n", "<C-p>", ":Telescope find_files<cr>", opts)
 keymap("n", "<leader>tc", ":Telescope git_commits<cr>", opts)
 keymap("n", "<leader>ti", ":Telescope git_bcommits<cr>", opts)
 keymap("n", "<leader>ts", ":Telescope git_status<cr>", opts)
 keymap("n", "<leader>to", ":Telescope command_history<cr>", opts)
-keymap("n", "<leader>tb", ":Telescope buffers theme=dropdown<cr>", opts)
 keymap("n", "<leader>tj", ":Telescope jumplist theme=dropdown<cr>", opts)
 
 -- Telescope plugins
-keymap("n", "<C-p>", ":Telescope harpoon marks<cr>", opts)
+keymap("n", "<C-a>", ":Telescope harpoon marks<cr>", opts)
 keymap("n", "<leader>ta", ":Telescope adjacent theme=dropdown<cr>", opts)
-keymap("n", "<leader>tt", ":Telescope tailiscope<cr>", opts)
-keymap("n", "<leader>tf", "<Cmd>lua require('telescope').extensions.frecency.frecency()<CR>", opts)
+keymap("n", "<leader>tz", ":Telescope tailiscope<cr>", opts)
+keymap("n", "<leader>tt", "::Telescope command_palette<cr>", opts)
+
+-- Telescope custom
+keymap("n", "<leader>tb", ":MB<cr>", opts)
 
 -- LSP
+vim.keymap.set('n', '<leader>ge', vim.diagnostic.open_float, opts)
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+vim.keymap.set('n', '<leader>gq', vim.diagnostic.setloclist, opts)
 vim.api.nvim_create_autocmd("LspAttach", {
   desc = "LSP actions",
   callback = function()
@@ -51,23 +56,12 @@ vim.api.nvim_create_autocmd("LspAttach", {
     bufmap("n", "<leader>gt", "<cmd>lua vim.lsp.buf.type_definition()<cr>")
     bufmap("n", "<leader>gi", "<cmd>lua vim.lsp.buf.implementation()<cr>")
     bufmap("n", "<leader>gr", "<cmd>lua vim.lsp.buf.references()<cr>")
+    bufmap("n", "<leader>gn", vim.lsp.buf.rename)
+    bufmap('n', '<leader>gk', vim.lsp.buf.hover)
+    bufmap('n', '<leader>ga', "<cmd>CodeActionMenu<cr>")
+    bufmap('n', '<leader>gF', function() vim.lsp.buf.format { async = true } end)
   end
 })
-
--- LSP Saga
-keymap("n", "<leader>gf", "<cmd>Lspsaga lsp_finder<cr>", opts)
-keymap("n", "<leader>gp", "<cmd>Lspsaga peek_definition<cr>", opts)
-keymap("n", "<leader>ga", "<cmd>Lspsaga code_action<cr>", opts)
-keymap("n", "<leader>gn", "<cmd>Lspsaga rename<cr>", opts)
-
-keymap("n", "<leader>go", "<cmd>LSoutlineToggle<cr>", opts)
-keymap("n", "<leader>gk", "<cmd>Lspsaga hover_doc<cr>", opts)
-
-keymap("n", "<A-t>", "<cmd>Lspsaga open_floaterm<cr>", opts)
-keymap("t", "<A-t>", [[<C-\><C-n><cmd>Lspsaga close_floaterm<cr>]], opts)
-
-keymap("n", "[d", "<cmd>Lspsaga diagnostic_jump_prev<cr>", opts)
-keymap("n", "]d", "<cmd>Lspsaga diagnostic_jump_next<cr>", opts)
 
 -- Harpoon
 keymap("n", "<leader>aa", "<cmd>lua require('harpoon.mark').add_file()<cr>", opts)
@@ -102,9 +96,11 @@ keymap("n", "m_", ":MarksQFListAll<cr>", opts)
 -- Zen Mode
 keymap("n", "<leader>zz", ":ZenMode<cr>", opts)
 vim.keymap.set('n', '<Leader>zm', "<Cmd>lua require('maximize').toggle()<CR>")
-keymap("n", "<leader>of", ":Neotree toggle filesystem reveal right <cr>", opts)
-keymap("n", "<leader>ob", ":Neotree toggle buffers reveal float <cr>", opts)
-keymap("n", "<leader>oh", ":Neotree toggle git_status reveal float <cr>", opts)
+
+keymap("n", "<leader>of", ":Neotree toggle filesystem reveal right<cr>", opts)
+keymap("n", "<leader>ob", ":Neotree toggle buffers reveal float<cr>", opts)
+keymap("n", "<leader>oh", ":Neotree toggle git_status reveal float<cr>", opts)
+keymap("n", "<leader>op", ":Neotree toggle git_status reveal float git_base=master<cr>", opts)
 
 keymap("n", "[q", ":cprevious<cr>", opts)
 keymap("n", "]q", ":cnext<cr>", opts)
@@ -119,4 +115,14 @@ vim.keymap.set({"x", "o"}, "aI", "<Cmd>lua require'treesitter_indent_object.text
 vim.keymap.set({"x", "o"}, "ii", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_inner()<CR>")
 -- select entire inner range (including if, else, etc.)
 vim.keymap.set({"x", "o"}, "iI", "<Cmd>lua require'treesitter_indent_object.textobj'.select_indent_inner(true)<CR>")
+vim.api.nvim_set_keymap('n',"<leader>g?","<cmd>InspectTwoslashQueries<CR>",{})
+vim.api.nvim_set_keymap('n',"<leader>g/","<cmd>RemoveTwoslashQueries<CR>",{})
 
+--- go to preview
+keymap("n", "<leader>gpd", "<cmd>lua require('goto-preview').goto_preview_definition()<CR>", opts)
+keymap("n", "<leader>gpt", "<cmd>lua require('goto-preview').goto_preview_type_definition()<CR>", opts)
+keymap("n", "<leader>gpi", "<cmd>lua require('goto-preview').goto_preview_implementation()<CR>", opts)
+keymap("n", "<leader>gpr", "<cmd>lua require('goto-preview').goto_preview_references()<CR>", opts)
+keymap("n", "<leader>gP", "<cmd>lua require('goto-preview').close_all_win()<CR>", opts)
+
+vim.keymap.set({ "n" }, "K", require("ts-node-action").node_action, { desc = "Trigger Node Action" })

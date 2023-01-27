@@ -1,6 +1,3 @@
-require('telescope').load_extension('fzf')
-require('telescope').load_extension("adjacent")
-require('telescope').load_extension('tailiscope')
 local actions = require('telescope.actions')
 
 local git_icons = {
@@ -60,6 +57,27 @@ require('telescope').setup {
     }
   },
   extensions = {
+    command_palette = {
+      { "CommentBox",
+        { "Left aligned line", ':CBline3' },
+        { "Centered line", ':CBcline3' },
+        { "Left aligned box of fixed size with Left aligned text", ':CBlbox' },
+        { "Centered box of fixed size with Left aligned text", ':CBclbox' },
+        { "Left aligned box of fixed size with centered text", ':CBcbox' },
+        { "Centered box of fixed size with centered text", ':CBccbox' },
+        { "Left aligned adapted box with Left aligned text", ':CBalbox' },
+        { "Centered adapted box with Left aligned text", ':CBaclbox' },
+        { "Left aligned adapted box with centered text", ':CBacbox' },
+        { "Centered adapted box with centered text", ':CBaccbox' },
+      },
+      { "Vim",
+        { "reload vimrc", ":source $MYVIMRC" },
+      },
+      {
+        "GitSigns",
+        { "Change base to master", ":Gitsigns change_base master global" },
+      }
+    },
     fzf = {
       override_generic_sorter = false,
       override_file_sorter = true,
@@ -67,3 +85,35 @@ require('telescope').setup {
     }
   }
 }
+
+local previewers = require("telescope.previewers")
+local pickers = require("telescope.pickers")
+local finders = require("telescope.finders")
+local sorters = require("telescope.sorters")
+local changed_on_branch = function()
+  pickers
+      .new({
+        results_title = "Modified on current branch",
+        finder = finders.new_oneshot_job({
+          "git",
+          "diff",
+          "--name-only",
+          "--relative",
+          "master",
+        }),
+        sorter = sorters.get_fuzzy_file(),
+        previewer = previewers.new_termopen_previewer({
+          get_command = function(entry)
+            return { "git", "diff", "--relative", "master", entry.value }
+          end,
+        }),
+      })
+      :find()
+end
+
+vim.api.nvim_create_user_command("MB", changed_on_branch, {})
+
+require('telescope').load_extension('fzf')
+require('telescope').load_extension("adjacent")
+require('telescope').load_extension('tailiscope')
+require('telescope').load_extension('command_palette')

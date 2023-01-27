@@ -3,6 +3,10 @@ local configs = require('lspconfig/configs')
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities.textDocument.completion.completionItem.snippetSupport = true
 
+vim.g.markdown_fenced_languages = {
+  "ts=typescript"
+}
+
 require "fidget".setup {}
 
 -- local prettier = {
@@ -26,7 +30,6 @@ require("mason-lspconfig").setup({
 })
 
 local fn = vim.fn
-local saga = require('lspsaga')
 local lspconfig = require("lspconfig")
 
 local cmp = require('cmp')
@@ -34,9 +37,6 @@ local luasnip = require('luasnip')
 local select_opts = { behavior = cmp.SelectBehavior.Select }
 
 local lsp_defaults = {
-  flags = {
-    debounce_text_changes = 150,
-  },
   capabilities = require('cmp_nvim_lsp').default_capabilities(
     vim.lsp.protocol.make_client_capabilities()
   ),
@@ -44,11 +44,6 @@ local lsp_defaults = {
     require 'illuminate'.on_attach(client)
   end
 }
-
-saga.init_lsp_saga({
-  border_style = "rounded",
-  saga_winblend = 10,
-})
 
 fn.sign_define("DiagnosticSignError", { text = "", texthl = "DiagnosticSignError" })
 fn.sign_define("DiagnosticSignWarn", { text = "", texthl = "DiagnosticSignWarn" })
@@ -72,6 +67,9 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(
 lspconfig.eslint.setup {}
 lspconfig.tailwindcss.setup {}
 lspconfig.tsserver.setup({
+  on_attach = function(client, bufnr)
+       require("twoslash-queries").attach(client, bufnr)
+    end,
   -- init_options = { documentFormatting = true },
   -- settings = {
   --   languages = {
@@ -96,7 +94,6 @@ lspconfig.tsserver.setup({
 --   }
 -- })
 
-local lspkind = require('lspkind')
 lspconfig.sumneko_lua.setup({
   settings = {
     Lua = {
@@ -122,14 +119,6 @@ cmp.setup({
   },
   window = {
     documentation = cmp.config.window.bordered()
-  },
-  formatting = {
-    fields = { 'menu', 'abbr', 'kind' },
-    format = lspkind.cmp_format({
-      mode = 'symbol', -- show only symbol annotations
-      maxwidth = 50, -- prevent the popup from showing more than provided characters (e.g 50 will not show more than 50 characters)
-      ellipsis_char = '...', -- when popup menu exceed maxwidth, the truncated part would show ellipsis_char instead (must define maxwidth first)
-    })
   },
   mapping = {
     ['<Up>'] = cmp.mapping.select_prev_item(select_opts),
@@ -187,76 +176,3 @@ cmp.event:on(
   'confirm_done',
   cmp_autopairs.on_confirm_done()
 )
-
--- local prettier = require("prettier")
-
--- prettier.setup({
---   bin = 'prettier', -- or `'prettierd'` (v0.22+)
---   filetypes = {
---     "css",
---     "graphql",
---     "html",
---     "javascript",
---     "javascriptreact",
---     "json",
---     "less",
---     "markdown",
---     "scss",
---     "typescript",
---     "typescriptreact",
---     "yaml",
---   },
---   cli_options = {
---     semi = true,
---   }
--- })
-
-local lspkind_priority = require('cmp-lspkind-priority')
-lspkind_priority.setup {
-  -- Default priority by nvim-cmp
-  priority = {
-    'Method',
-    'Function',
-    'Constructor',
-    'Field',
-    'Variable',
-    'Class',
-    'Interface',
-    'Snippet',
-    'Module',
-    'Property',
-    'Unit',
-    'Value',
-    'Enum',
-    'Keyword',
-    'Color',
-    'File',
-    'Reference',
-    'Folder',
-    'EnumMember',
-    'Constant',
-    'Struct',
-    'Event',
-    'Operator',
-    'TypeParameter',
-    'Text',
-  }
-}
-
-local compare = require('cmp.config.compare')
-require('cmp').setup {
-  sorting = {
-    comparators = {
-      lspkind_priority.compare, -- Replaces `compare.kind` + first comparator
-      compare.offset,
-      compare.exact,
-      -- compare.scopes,
-      compare.score,
-      compare.recently_used,
-      compare.locality,
-      compare.sort_text,
-      compare.length,
-      compare.order,
-    },
-  },
-}
